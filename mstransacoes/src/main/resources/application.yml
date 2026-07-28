@@ -1,0 +1,35 @@
+spring:
+    application:
+        name: mstransacoes
+    # datasource:
+    #     driver-class-name: org.postgresql.Driver
+    #    # Se houver a variável do Docker usa ela, senão usa o localhost para a IDE
+    #     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/conta}
+    #     username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    #     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    # flyway:
+    #     enabled: true
+    #     baseline-on-migrate: false
+    #     locations: classpath:db/migration
+    #     # Força o Flyway a rodar antes de qualquer coisa
+    #     validate-on-migrate: true
+    # jpa:
+    #     database-platform: org.hibernate.dialect.PostgreSQLDialect
+    #     hibernate:
+    #         ddl-auto: validate # Valida o schema do banco com as entidades, mas não faz alterações
+    #     show-sql: true
+    #     defer-datasource-initialization: false # Força o Hibernate a esperar o Flyway concluir
+    #     properties:
+    #         jakarta.persistence.schema-generation.database.action: none
+
+server:
+  port: 0
+
+eureka:
+  client:
+    service-url:
+      fetch-registry: true
+      register-with-eureka: true
+      defaultZone: http://localhost:8761/eureka/
+#   instance:
+#     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
