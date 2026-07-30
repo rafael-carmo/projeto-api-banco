@@ -1,12 +1,12 @@
 spring:
     application:
         name: mstransacoes
-    # datasource:
-    #     driver-class-name: org.postgresql.Driver
-    #    # Se houver a variável do Docker usa ela, senão usa o localhost para a IDE
-    #     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/conta}
-    #     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    #     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+    datasource:
+        driver-class-name: org.postgresql.Driver
+       # Se houver a variável do Docker usa ela, senão usa o localhost para a IDE
+        url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/conta}
+        username: ${SPRING_DATASOURCE_USERNAME:postgres}
+        password: ${SPRING_DATASOURCE_PASSWORD:postgres}
     # flyway:
     #     enabled: true
     #     baseline-on-migrate: false

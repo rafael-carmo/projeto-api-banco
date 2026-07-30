@@ -1,6 +1,7 @@
 package br.com.apibanco.mstransacoes.controllers;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +21,11 @@ import lombok.RequiredArgsConstructor;
 public class ContaController {
 
     private final ContaService contaService;
+
+    @GetMapping
+    public ResponseEntity<String> connect() {
+        return ResponseEntity.ok("teste controller");
+    }
 
     @PostMapping("/deposito")
     public ResponseEntity<ContaResponseDTO> depositar(@RequestBody @Valid ContaMovimentacaoDTO request) {
