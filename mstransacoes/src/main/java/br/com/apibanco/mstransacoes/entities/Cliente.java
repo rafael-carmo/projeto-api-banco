@@ -1,7 +1,6 @@
 package br.com.apibanco.mstransacoes.entities;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,21 +20,15 @@ import lombok.Setter;
 @Entity
 @Table(name = "clientes")
 public class Cliente {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, updatable = false)
-    private UUID id;
+    private Long id;
 
-    @Column(name = "numero", nullable = false)
-    private String numero;
-    
-    @Column(name = "saldo", nullable = false)
-    private String saldo;
-    
-    @Column(name = "data_abertura", nullable = false)
-    private LocalDateTime dataAbertura;
-    
-    @Column(name = "data_fechamento", nullable = false)
-    private LocalDateTime dataFechamento;
+    @Column(name = "nome", nullable = false)
+    private String nome;
+
+    @Column(name = "data_nascimento", nullable = false)
+    private LocalDateTime dataNascimento;
 }
