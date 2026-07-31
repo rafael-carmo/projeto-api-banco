@@ -30,7 +30,7 @@ public class ContaService {
 
     @Transactional
     public Conta sacar(ContaMovimentacaoDTO movimentacaoDTO) {
-        var conta = contaRepository.findByNumeroAndIdCliente(movimentacaoDTO.numeroConta(), movimentacaoDTO.idCliente())
+        var conta = contaRepository.findByNumeroAndClienteId(movimentacaoDTO.numeroConta(), movimentacaoDTO.idCliente())
                 .orElseThrow(
                         () -> new ContaNotFoundException("Conta não encontrada: " + movimentacaoDTO.numeroConta()));
 
@@ -45,7 +45,7 @@ public class ContaService {
         }
 
         var contaOrigem = contaRepository
-                .findByNumeroAndIdCliente(contaTransferenciaDTO.numeroContaOrigem(), contaTransferenciaDTO.idCliente())
+                .findByNumeroAndClienteId(contaTransferenciaDTO.numeroContaOrigem(), contaTransferenciaDTO.idCliente())
                 .orElseThrow(() -> new ContaNotFoundException(
                         "Conta não encontrada: " + contaTransferenciaDTO.numeroContaOrigem()));
 

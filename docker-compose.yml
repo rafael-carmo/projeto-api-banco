@@ -1,0 +1,170 @@
+# version: '3.8'
+
+services:
+  # rabbitmq:
+  #   image: rabbitmq:4.1.4-management
+  #   container_name: cursomsrabbitmq
+  #   hostname: pcivil-rabbitmq
+  #   ports:
+  #     - "15672:15672"  # Management UI
+  #     - "5672:5672"    # AMQP protocol
+  #   environment:
+  #     - RABBITMQ_DEFAULT_USER=guest
+  #     - RABBITMQ_DEFAULT_PASS=guest
+  #   volumes:
+  #     - rabbitmq_data:/var/lib/rabbitmq
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD", "rabbitmqctl", "status"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+
+  # keycloak:
+  #   image: quay.io/keycloak/keycloak:26.4.0
+  #   container_name: cursomskeycloak
+  #   ports:
+  #     - "8081:8080"
+  #   environment:
+  #     - KEYCLOAK_ADMIN=admin
+  #     - KEYCLOAK_ADMIN_PASSWORD=admin
+  #     - KC_HEALTH_ENABLED=true
+  #     - KC_METRICS_ENABLED=true
+  #   volumes:
+  #     - keycloak_data:/opt/keycloak/data
+  #   command:
+  #     - start-dev
+  #   networks:
+  #     - app-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #   depends_on:
+  #     rabbitmq:
+  #       condition: service_healthy
+
+  db:
+    image: postgres:16
+    container_name: apibanco-database
+    restart: unless-stopped
+    networks:
+      - apibanco-network
+    ports:
+      - "5437:5432"
+    environment:
+      POSTGRES_DB: apibanco        # (Padrão Oficial)
+      POSTGRES_USER: postgres      # (Padrão Oficial)
+      POSTGRES_PASSWORD: postgres  # (Padrão Oficial)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d apibanco"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  eureka:
+    build: 
+      context: ./eurekaserver
+      dockerfile: Dockerfile
+    image: apibanco-eureka:1.0.0
+    container_name: apibanco-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - apibanco-network
+    # depends_on:
+    #   rabbitmq:
+    #     condition: service_healthy
+
+  mstransacoes:
+    build: 
+      context: ./mstransacoes
+      dockerfile: Dockerfile
+    image: apibanco-mstransacoes:1.0.0
+    container_name: apibanco-mstransacoes
+    networks:
+      - apibanco-network
+    depends_on:
+      - eureka
+    environment:
+      DB_HOST: db    # Aponta para o nome do serviço do banco
+      DB_PORT: 5432  # Comunicação interna entre containers usa sempre 5432
+      DB_NAME: apibanco
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      EUREKA_SERVER: apibanco-eureka
+
+  # mscartoes:
+  #   build: 
+  #     context: ./mscartoes
+  #     dockerfile: Dockerfile
+  #   image: cursoms-mscartoes:1.0.0
+  #   container_name: cursoms-mscartoes
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - rabbitmq
+  #     - eureka
+  #   environment:
+  #     - RABBITMQ_SERVER=cursomsrabbitmq
+  #     - EUREKA_SERVER=cursoms-eureka
+  # msclientes:
+  #   build: 
+  #     context: ./msclientes
+  #     dockerfile: Dockerfile
+  #   image: cursoms-msclientes:1.0.0
+  #   container_name: cursoms-msclientes
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - eureka
+  #   environment:
+  #     - EUREKA_SERVER=cursoms-eureka
+  # msavaliadorcredito:
+  #   build: 
+  #     context: ./msavaliadorcredito
+  #     dockerfile: Dockerfile
+  #   image: cursoms-msavaliadorcredito:1.0.0
+  #   container_name: cursoms-msavaliadorcredito
+  #   networks:
+  #     - app-network
+  #   depends_on:
+  #     - eureka
+  #   environment:
+  #     - EUREKA_SERVER=cursoms-eureka
+  #     - RABBITMQ_SERVER=cursomsrabbitmq
+
+  mscloudgateway:
+    build: 
+      context: ./mscloudgateway
+      dockerfile: Dockerfile
+    image: apibanco-msgateway:1.0.0
+    container_name: apibanco-msgateway
+    ports:
+      - "8080:8080"
+    networks:
+      - apibanco-network
+    depends_on:
+      - eureka
+      # - keycloak
+    environment:
+      EUREKA_SERVER: apibanco-eureka
+      # - KEYCLOAK_SERVER: apibancokeycloak
+      # - KEYCLOAK_PORT: 8080
+
+volumes:
+  # rabbitmq_data:
+  # keycloak_data:
+  # eurekaserver_data:
+  # mstransacoes_data:
+  # msclientes_data:
+  # msavaliadorcredito_data:
+  # mscloudgateway_data:
+  postgres_data:
+
+networks:
+  apibanco-network:
+    driver: bridge

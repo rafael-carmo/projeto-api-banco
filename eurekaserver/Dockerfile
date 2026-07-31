@@ -7,6 +7,9 @@ WORKDIR /app
 # Copia apenas o POM para baixar as dependências primeiro (otimização de cache)
 COPY pom.xml .
 # RUN mvn -B dependency:go-offline
+# RUN mvn -B dependency:go-offline \
+#     -Dmaven.wagon.http.retryHandler.count=3 \
+#     -Dhttp.keepAlive=false
 
 
 # Copia o código-fonte e compila (será muito mais rápido)
@@ -23,6 +26,8 @@ WORKDIR /app
 
 # COPIAR O JAR DO PROJETO DA ETAPA DE BUILD
 COPY --from=build /app/target/*.jar app.jar
+
+EXPOSE 8761
 
 # COMANDO PARA EXECUTAR O JAR DO PROJETO
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

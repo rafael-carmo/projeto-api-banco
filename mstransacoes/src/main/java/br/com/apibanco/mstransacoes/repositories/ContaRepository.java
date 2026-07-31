@@ -9,5 +9,5 @@ import br.com.apibanco.mstransacoes.entities.Conta;
 public interface ContaRepository extends JpaRepository<Conta, Long> {
     Optional<Conta> findByNumero(String numero);
 
-    Optional<Conta> findByNumeroAndIdCliente(String numero, Long idCliente);
+    Optional<Conta> findByNumeroAndClienteId(String numero, Long idCliente);
 }

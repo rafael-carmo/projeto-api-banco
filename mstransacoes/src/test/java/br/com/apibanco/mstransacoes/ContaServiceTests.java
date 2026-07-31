@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import br.com.apibanco.mstransacoes.dtos.ContaMovimentacaoDTO;
 import br.com.apibanco.mstransacoes.dtos.ContaResponseDTO;
+import br.com.apibanco.mstransacoes.entities.Cliente;
 import br.com.apibanco.mstransacoes.entities.Conta;
 import br.com.apibanco.mstransacoes.enums.TipoConta;
 import br.com.apibanco.mstransacoes.repositories.ContaRepository;
@@ -35,13 +36,21 @@ public class ContaServiceTests {
     private Conta contaOrigem;
     private Conta contaDestino;
 
+    private Cliente clienteOrigem;
+    private Cliente clienteDestino;
+
     @BeforeEach
     void setUp() {
         // Inicializa contas de teste usando o construtor da Entidade (ID_CLIENTE,
         // NUMERO, TIPO, SALDO)
-        contaOrigem = new Conta(1L, 1L, "12345", LocalDateTime.now(), LocalDateTime.now(), TipoConta.CORRENTE,
+        clienteOrigem = new Cliente(1L, "Cliente Origem", LocalDateTime.now());
+        clienteDestino = new Cliente(2L, "Cliente Destino", LocalDateTime.now());
+
+        contaOrigem = new Conta(1L, clienteOrigem, "12345", LocalDateTime.now(), LocalDateTime.now(),
+                TipoConta.CORRENTE,
                 new BigDecimal("1000.00"));
-        contaDestino = new Conta(2L, 2L, "67890", LocalDateTime.now(), LocalDateTime.now(), TipoConta.POUPANCA,
+        contaDestino = new Conta(2L, clienteDestino, "67890", LocalDateTime.now(), LocalDateTime.now(),
+                TipoConta.POUPANCA,
                 new BigDecimal("500.00"));
     }
 
