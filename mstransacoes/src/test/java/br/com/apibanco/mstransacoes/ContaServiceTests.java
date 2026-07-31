@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -43,8 +43,8 @@ public class ContaServiceTests {
     void setUp() {
         // Inicializa contas de teste usando o construtor da Entidade (ID_CLIENTE,
         // NUMERO, TIPO, SALDO)
-        clienteOrigem = new Cliente(1L, "Cliente Origem", LocalDateTime.now());
-        clienteDestino = new Cliente(2L, "Cliente Destino", LocalDateTime.now());
+        clienteOrigem = new Cliente(1L, "Cliente Origem", LocalDate.now());
+        clienteDestino = new Cliente(2L, "Cliente Destino", LocalDate.now());
 
         contaOrigem = new Conta(1L, clienteOrigem, "12345", LocalDateTime.now(), LocalDateTime.now(),
                 TipoConta.CORRENTE,

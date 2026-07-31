@@ -23,8 +23,8 @@ public class ContaController {
     private final ContaService contaService;
 
     @GetMapping
-    public ResponseEntity<String> connect() {
-        return ResponseEntity.ok("teste controller");
+    public ResponseEntity<String> status() {
+        return ResponseEntity.ok("Status do serviço de transações: OK");
     }
 
     @PostMapping("/deposito")

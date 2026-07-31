@@ -1,6 +1,6 @@
 package br.com.apibanco.mstransacoes.entities;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,5 +30,5 @@ public class Cliente {
     private String nome;
 
     @Column(name = "data_nascimento", nullable = false)
-    private LocalDateTime dataNascimento;
+    private LocalDate dataNascimento;
 }
