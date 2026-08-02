@@ -16,22 +16,23 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import br.com.apibanco.mstransacoes.dtos.ContaMovimentacaoDTO;
-import br.com.apibanco.mstransacoes.dtos.ContaResponseDTO;
+import br.com.apibanco.mstransacoes.dtos.DepositoDTO;
+import br.com.apibanco.mstransacoes.dtos.ComprovanteDepositoDTO;
+import br.com.apibanco.mstransacoes.dtos.ComprovanteSaqueDTO;
 import br.com.apibanco.mstransacoes.entities.Cliente;
 import br.com.apibanco.mstransacoes.entities.Conta;
 import br.com.apibanco.mstransacoes.enums.TipoConta;
 import br.com.apibanco.mstransacoes.repositories.ContaRepository;
-import br.com.apibanco.mstransacoes.services.ContaService;
+import br.com.apibanco.mstransacoes.services.TransacaoService;
 
 @ExtendWith(MockitoExtension.class)
-public class ContaServiceTests {
+public class TransacaoServiceTests {
 
     @Mock
     private ContaRepository repository;
 
     @InjectMocks
-    private ContaService service;
+    private TransacaoService service;
 
     private Conta contaOrigem;
     private Conta contaDestino;
@@ -58,13 +59,14 @@ public class ContaServiceTests {
     @DisplayName("Deve realizar depósito com sucesso")
     void deveRealizarDepositoComSucesso() {
         // Arrange
-        ContaMovimentacaoDTO request = new ContaMovimentacaoDTO(null, "12345", new BigDecimal("250.50"));
+        DepositoDTO request = new DepositoDTO("12345", new BigDecimal("250.50"));
         when(repository.findByNumero("12345")).thenReturn(Optional.of(contaOrigem));
 
         // Act
-        Conta conta = service.depositar(request);
+        ComprovanteDepositoDTO comprovanteDeposito = service.depositar(request);
 
-        ContaResponseDTO response = new ContaResponseDTO(conta);
+        ComprovanteSaqueDTO response = new ComprovanteSaqueDTO(contaOrigem, request.valor(),
+                LocalDateTime.now());
 
         // Assert
         // Nota: compareTo == 0 garante a igualdade de valores do BigDecimal sem falhar
