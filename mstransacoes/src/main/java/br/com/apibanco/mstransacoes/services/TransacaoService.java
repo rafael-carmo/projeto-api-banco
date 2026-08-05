@@ -3,12 +3,14 @@ package br.com.apibanco.mstransacoes.services;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.apibanco.mstransacoes.dtos.DepositoDTO;
 import br.com.apibanco.mstransacoes.dtos.SaqueDTO;
+import br.com.apibanco.mstransacoes.dtos.TransactionEventDTO;
 import br.com.apibanco.mstransacoes.dtos.TransferenciaDTO;
 import br.com.apibanco.mstransacoes.dtos.ComprovanteDepositoDTO;
 import br.com.apibanco.mstransacoes.dtos.ComprovanteSaqueDTO;
@@ -22,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TransacaoService {
     private final ContaRepository contaRepository;
+    private final TransactionEventProducer transactionEventProducer;
 
     @Transactional
     public ComprovanteDepositoDTO depositar(DepositoDTO movimentacaoDTO) {
@@ -33,6 +36,19 @@ public class TransacaoService {
 
         // inserir informação no broker de mensagens Kafka, para notificar outros
         // serviços sobre a movimentação da conta
+        UUID transactionId = UUID.randomUUID();
+        
+        var transactionEvent = new TransactionEventDTO(
+            transactionId,
+            null, // Conta Origem (nulo em depósitos)
+            conta.getNumero(),  // Conta Destino
+            movimentacaoDTO.valor(),
+            "DEPOSIT",
+            "COMPLETED",
+            Instant.now()
+        );
+
+        transactionEventProducer.sendTransactionEvent(transactionEvent);
 
         return new ComprovanteDepositoDTO(conta, movimentacaoDTO.valor(),
                 Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime());
@@ -48,6 +64,20 @@ public class TransacaoService {
 
         // inserir informação no broker de mensagens Kafka, para notificar outros
         // serviços sobre a movimentação da conta
+        // Cria e envia o evento de Saque para o Kafka
+        UUID transactionId = UUID.randomUUID();
+
+        var transactionEvent = new TransactionEventDTO(
+            transactionId,
+            conta.getNumero(),        // Conta Origem (quem está sacando)
+            null, // Conta Destino (nulo em saques)
+            movimentacaoDTO.valor(),
+            "WITHDRAW",
+            "COMPLETED",
+            Instant.now()
+        );
+
+        transactionEventProducer.sendTransactionEvent(transactionEvent);
 
         return new ComprovanteSaqueDTO(conta, movimentacaoDTO.valor(),
                 Instant.now().atZone(ZoneId.systemDefault()).toLocalDateTime());
@@ -77,6 +107,21 @@ public class TransacaoService {
 
         // inserir informação no broker de mensagens Kafka, para notificar outros
         // serviços sobre a movimentação da conta
+        
+        // Cria e envia o evento de Transferência completa para o Kafka
+        UUID transactionId = UUID.randomUUID();
+
+        var transactionEvent = new TransactionEventDTO(
+            transactionId,
+            contaOrigem.getNumero(),
+            contaDestino.getNumero(),
+            transferenciaDTO.valor(),
+            "TRANSFER",
+            "COMPLETED",
+            Instant.now()
+        );
+
+        transactionEventProducer.sendTransactionEvent(transactionEvent);
 
         return new ComprovanteTransferenciaDTO(
                 contaOrigem.getNumero(),

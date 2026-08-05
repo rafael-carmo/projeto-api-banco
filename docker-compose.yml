@@ -78,7 +78,30 @@ services:
     # depends_on:
     #   rabbitmq:
     #     condition: service_healthy
-
+  
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0  # Versão estável e moderna do Kafka
+    container_name: apibanco-kafka
+    ports:
+      - "9092:9092"                     # Porta usada para conexões de fora do Docker (sua IDE/máquina)
+    networks:
+      - apibanco-network
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092' # kafka:29092 para dentro do docker, localhost:9092 para fora
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      # Configurações do modo KRaft (Sem Zookeeper)
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://0.0.0.0:29092,CONTROLLER://0.0.0.0:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM0Qk' # ID único aleatório para identificar o cluster KRaft
   mstransacoes:
     build: 
       context: ./mstransacoes
@@ -89,6 +112,7 @@ services:
       - apibanco-network
     depends_on:
       - eureka
+      - kafka
     environment:
       DB_HOST: db    # Aponta para o nome do serviço do banco
       DB_PORT: 5432  # Comunicação interna entre containers usa sempre 5432
@@ -97,6 +121,7 @@ services:
       DB_PASSWORD: postgres
       # EUREKA_SERVER: apibanco-eureka
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
   # mscartoes:
   #   build: 
