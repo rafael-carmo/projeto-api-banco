@@ -53,7 +53,7 @@ services:
     networks:
       - apibanco-network
     ports:
-      - "5437:5432"
+      - "5438:5432"
     environment:
       POSTGRES_DB: apibanco        # (Padrão Oficial)
       POSTGRES_USER: postgres      # (Padrão Oficial)
@@ -75,9 +75,17 @@ services:
       - "8761:8761"
     networks:
       - apibanco-network
-    # depends_on:
+    depends_on:
+      db:
+        condition: service_healthy
     #   rabbitmq:
     #     condition: service_healthy
+    # ADICIONADO: Healthcheck nativo para o Eureka sem precisar de comandos complexos
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 2 bash -c '</dev/tcp/127.0.0.1/8761' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
   
   kafka:
     image: confluentinc/cp-kafka:7.6.0  # Versão estável e moderna do Kafka
@@ -102,6 +110,20 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM0Qk' # ID único aleatório para identificar o cluster KRaft
+  
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.1 # Versão moderna e compatível
+    container_name: apibanco-kafdrop
+    ports:
+      - "9000:9000"                       # Porta para acessar no seu navegador
+    networks:
+      - apibanco-network
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:29092"  # Aponta para o nome do serviço kafka do compose
+      JVM_OPTS: "-Xms32M -Xmx64M"         # Super leve, consome pouquíssima memória
+    depends_on:
+      - kafka
+  
   mstransacoes:
     build: 
       context: ./mstransacoes
@@ -111,8 +133,12 @@ services:
     networks:
       - apibanco-network
     depends_on:
-      - eureka
-      - kafka
+      db:
+        condition: service_healthy
+      eureka:
+        condition: service_started
+      kafka:
+        condition: service_started
     environment:
       DB_HOST: db    # Aponta para o nome do serviço do banco
       DB_PORT: 5432  # Comunicação interna entre containers usa sempre 5432
@@ -120,48 +146,9 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       # EUREKA_SERVER: apibanco-eureka
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://apibanco-eureka:8761/eureka/
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
-  # mscartoes:
-  #   build: 
-  #     context: ./mscartoes
-  #     dockerfile: Dockerfile
-  #   image: cursoms-mscartoes:1.0.0
-  #   container_name: cursoms-mscartoes
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - rabbitmq
-  #     - eureka
-  #   environment:
-  #     - RABBITMQ_SERVER=cursomsrabbitmq
-  #     - EUREKA_SERVER=cursoms-eureka
-  # msclientes:
-  #   build: 
-  #     context: ./msclientes
-  #     dockerfile: Dockerfile
-  #   image: cursoms-msclientes:1.0.0
-  #   container_name: cursoms-msclientes
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - eureka
-  #   environment:
-  #     - EUREKA_SERVER=cursoms-eureka
-  # msavaliadorcredito:
-  #   build: 
-  #     context: ./msavaliadorcredito
-  #     dockerfile: Dockerfile
-  #   image: cursoms-msavaliadorcredito:1.0.0
-  #   container_name: cursoms-msavaliadorcredito
-  #   networks:
-  #     - app-network
-  #   depends_on:
-  #     - eureka
-  #   environment:
-  #     - EUREKA_SERVER=cursoms-eureka
-  #     - RABBITMQ_SERVER=cursomsrabbitmq
 
   mscloudgateway:
     build: 
@@ -171,13 +158,15 @@ services:
     container_name: apibanco-msgateway
     ports:
       - "8080:8080"
+    restart: on-failure # <--- Resiliência caso o Eureka demore para aceitar conexões
     networks:
       - apibanco-network
     depends_on:
-      - eureka
+      eureka:
+        condition: service_started
       # - keycloak
     environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka:8761/eureka/
+      EUREKA_URI: http://apibanco-eureka:8761/eureka/
       # - KEYCLOAK_SERVER: apibancokeycloak
       # - KEYCLOAK_PORT: 8080
 

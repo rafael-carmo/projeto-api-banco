@@ -52,7 +52,7 @@ eureka:
     service-url:
       # defaultZone: http://localhost:8761/eureka/
        # Usará a variável configurada no Docker Compose para achar o Eureka. Na IDE, usa localhost.
-      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
   instance:
     # Importante para microsserviços com porta '0' rodando no Eureka, evitando sobreposição de instâncias
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
