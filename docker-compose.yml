@@ -139,6 +139,8 @@ services:
         condition: service_started
       kafka:
         condition: service_started
+    # ADICIONADO: Aguarda 10 segundos para o Eureka subir totalmente antes de disparar o Java
+    entrypoint: ["sh", "-c", "sleep 10 && java -jar app.jar"]
     environment:
       DB_HOST: db    # Aponta para o nome do serviço do banco
       DB_PORT: 5432  # Comunicação interna entre containers usa sempre 5432
@@ -146,7 +148,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
       # EUREKA_SERVER: apibanco-eureka
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://apibanco-eureka:8761/eureka/
+      EUREKA_URI: http://apibanco-eureka:8761/eureka/
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
 
 
@@ -165,6 +167,8 @@ services:
       eureka:
         condition: service_started
       # - keycloak
+    # ADICIONADO: Aguarda 12 segundos para garantir o Eureka respondendo rotas
+    entrypoint: ["sh", "-c", "sleep 12 && java -jar app.jar"]
     environment:
       EUREKA_URI: http://apibanco-eureka:8761/eureka/
       # - KEYCLOAK_SERVER: apibancokeycloak

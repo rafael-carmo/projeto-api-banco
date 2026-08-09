@@ -1,6 +1,6 @@
 # CRIAR UM AMBIENTE COM JDK E MAVEN PARA COMPILAR O PROJETO
 # ETAPA 1: COMPILAÇÃO
-FROM maven:3-eclipse-temurin-25-alpine AS build
+FROM maven:3-eclipse-temurin-21-alpine AS build
 # DEFINIR O DIRETÓRIO DE TRABALHO
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN mvn -B clean package -DskipTests
 
 # ETAPA 2: IMAGEM FINAL
 # CRIAR A IMAGEM FINAL COM O JAR DO PROJETO
-FROM eclipse-temurin:25-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 # DEFINIR O DIRETÓRIO DE TRABALHO
 WORKDIR /app
 

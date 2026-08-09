@@ -37,16 +37,15 @@ public class TransacaoService {
         // inserir informação no broker de mensagens Kafka, para notificar outros
         // serviços sobre a movimentação da conta
         UUID transactionId = UUID.randomUUID();
-        
+
         var transactionEvent = new TransactionEventDTO(
-            transactionId,
-            null, // Conta Origem (nulo em depósitos)
-            conta.getNumero(),  // Conta Destino
-            movimentacaoDTO.valor(),
-            "DEPOSIT",
-            "COMPLETED",
-            Instant.now()
-        );
+                transactionId,
+                null, // Conta Origem (nulo em depósitos)
+                conta.getNumero(), // Conta Destino
+                movimentacaoDTO.valor(),
+                "DEPOSIT",
+                "COMPLETED",
+                Instant.now());
 
         transactionEventProducer.sendTransactionEvent(transactionEvent);
 
@@ -68,14 +67,13 @@ public class TransacaoService {
         UUID transactionId = UUID.randomUUID();
 
         var transactionEvent = new TransactionEventDTO(
-            transactionId,
-            conta.getNumero(),        // Conta Origem (quem está sacando)
-            null, // Conta Destino (nulo em saques)
-            movimentacaoDTO.valor(),
-            "WITHDRAW",
-            "COMPLETED",
-            Instant.now()
-        );
+                transactionId,
+                conta.getNumero(), // Conta Origem (quem está sacando)
+                null, // Conta Destino (nulo em saques)
+                movimentacaoDTO.valor(),
+                "WITHDRAW",
+                "COMPLETED",
+                Instant.now());
 
         transactionEventProducer.sendTransactionEvent(transactionEvent);
 
@@ -107,19 +105,18 @@ public class TransacaoService {
 
         // inserir informação no broker de mensagens Kafka, para notificar outros
         // serviços sobre a movimentação da conta
-        
+
         // Cria e envia o evento de Transferência completa para o Kafka
         UUID transactionId = UUID.randomUUID();
 
         var transactionEvent = new TransactionEventDTO(
-            transactionId,
-            contaOrigem.getNumero(),
-            contaDestino.getNumero(),
-            transferenciaDTO.valor(),
-            "TRANSFER",
-            "COMPLETED",
-            Instant.now()
-        );
+                transactionId,
+                contaOrigem.getNumero(),
+                contaDestino.getNumero(),
+                transferenciaDTO.valor(),
+                "TRANSFER",
+                "COMPLETED",
+                Instant.now());
 
         transactionEventProducer.sendTransactionEvent(transactionEvent);
 
@@ -138,7 +135,7 @@ public class TransacaoService {
 
         if (operacao.equals("SAQUE")) {
             if (conta.getSaldo().compareTo(valor) < 0) {
-                throw new RuntimeException("Saldo insuficiente para saque");
+                throw new RuntimeException("Saldo insuficiente para saque/transferência.");
             }
             novoSaldo = conta.getSaldo().subtract(valor);
         } else { // Depósito

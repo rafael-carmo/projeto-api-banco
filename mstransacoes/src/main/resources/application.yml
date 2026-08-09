@@ -1,46 +1,46 @@
 spring:
-    application:
-      name: mstransacoes
-    datasource:
-      driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:apibanco}
-      username: ${DB_USER:postgres}
-      password: ${DB_PASSWORD:postgres}
-        
-    flyway:
-      enabled: true
-      baseline-on-migrate: false
-      locations: classpath:db/migration
-      # Força o Flyway a rodar antes de qualquer coisa
-      validate-on-migrate: true
+  application:
+    name: mstransacoes
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:apibanco}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+      
+  flyway:
+    enabled: true
+    baseline-on-migrate: false
+    locations: classpath:db/migration
+    # Força o Flyway a rodar antes de qualquer coisa
+    validate-on-migrate: true
 
-    jpa:
-      database-platform: org.hibernate.dialect.PostgreSQLDialect
-      hibernate:
-          ddl-auto: validate # Valida o schema do banco com as entidades, mas não faz alterações
-      show-sql: true
-      defer-datasource-initialization: false # Força o Hibernate a esperar o Flyway concluir
-      properties:
-          jakarta.persistence.schema-generation.database.action: none
-    
-    kafka:
-      # O Spring injetará automaticamente a variável que configuramos no Docker Compose (kafka:29092)
-      # Se rodar na IDE, ele usará o padrão localhost:9092
-      bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
-      # consumer:
-      #   group-id: ${KAFKA_CONSUMER_GROUP_ID:mstransacoes-group}
-      #   auto-offset-reset: earliest
-      #   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      #   value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      producer:
-        # 'all' garante resiliência: o Kafka só confirma o envio após o nó principal e as réplicas salvarem o evento
-        acks: all
-        # A chave do evento continua sendo uma String (geralmente o número da conta)
-        # Chave para garantir ordem (ex: ID da conta garante ordem por conta)
-        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-        # Transforma seu Objeto Java (Record) automaticamente em JSON
-        # JsonSerializer converte o Record/DTO automaticamente em JSON
-        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate # Valida o schema do banco com as entidades, mas não faz alterações
+    show-sql: true
+    defer-datasource-initialization: false # Força o Hibernate a esperar o Flyway concluir
+    properties:
+        jakarta.persistence.schema-generation.database.action: none
+  
+  kafka:
+    # O Spring injetará automaticamente a variável que configuramos no Docker Compose (kafka:29092)
+    # Se rodar na IDE, ele usará o padrão localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    # consumer:
+    #   group-id: ${KAFKA_CONSUMER_GROUP_ID:mstransacoes-group}
+    #   auto-offset-reset: earliest
+    #   key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    #   value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      # 'all' garante resiliência: o Kafka só confirma o envio após o nó principal e as réplicas salvarem o evento
+      acks: all
+      # A chave do evento continua sendo uma String (geralmente o número da conta)
+      # Chave para garantir ordem (ex: ID da conta garante ordem por conta)
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # Transforma seu Objeto Java (Record) automaticamente em JSON
+      # JsonSerializer converte o Record/DTO automaticamente em JSON
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 server:
   port: 0
@@ -51,7 +51,7 @@ eureka:
     register-with-eureka: true
     service-url:
       # defaultZone: http://localhost:8761/eureka/
-       # Usará a variável configurada no Docker Compose para achar o Eureka. Na IDE, usa localhost.
+      # Usará a variável configurada no Docker Compose para achar o Eureka. Na IDE, usa localhost.
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
   instance:
     # Importante para microsserviços com porta '0' rodando no Eureka, evitando sobreposição de instâncias
