@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: msextratoconsumer
+
+  # CONFIGURAÇÃO DO KAFKA CONSUMIDOR
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      # ID do grupo de consumidores. Se subirmos 2 instâncias desse app, 
+      # o Kafka dividirá as 3 partições entre elas automaticamente por causa deste ID comum.
+      group-id: cassandra-extrato-group
+      
+      # Caso o serviço mude de servidor ou perca o ponto de leitura (offset), 
+      # ele começará a ler o tópico desde a primeira mensagem disponível.
+      auto-offset-reset: earliest
+      
+      # Deserializadores: Como transformar os bytes da rede de volta para objetos Java
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      
+      properties:
+        # IMPORTANTE: Como desligamos os headers de tipo no produtor, 
+        # configuramos o JsonDeserializer para converter o JSON bruto recebido direto no DTO deste projeto.
+        spring.json.value.default.type: "br.com.apibanco.msextrato.dtos.TransactionEventDTO"
+        spring.json.trusted.packages: "*"
+
+  # CONFIGURAÇÃO DO CASSANDRA [1]
+  cassandra:
+    keyspace-name: bank_history
+    # 'cassandra' é o nome do serviço no docker-compose. Se rodar na IDE, usa localhost.
+    contact-points: ${CASSANDRA_HOST:localhost}:9042
+    local-datacenter: datacenter1
+    schema-action: create_if_not_exists # O Spring valida e ajuda a garantir a tabela [1]
+
+server:
+  port: 0 # Porta aleatória para não conflitar com outros microserviços
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+

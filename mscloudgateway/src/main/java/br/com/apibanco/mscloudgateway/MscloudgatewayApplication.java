@@ -22,6 +22,8 @@ public class MscloudgatewayApplication {
 				// .route("ms-contas", r -> r.path("/contas/**").uri("lb://ms-contas"))
 				.route("mstransacoes",
 						r -> r.path("/api/v1/transacoes", "/api/v1/transacoes/**").uri("lb://mstransacoes"))
+				.route("msextratoconsumer",
+						r -> r.path("/api/v1/extratos", "/api/v1/extratos/**").uri("lb://msextratoconsumer"))
 				.build();
 	}
 

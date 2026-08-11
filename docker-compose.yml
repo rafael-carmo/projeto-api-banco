@@ -1,26 +1,6 @@
 # version: '3.8'
 
 services:
-  # rabbitmq:
-  #   image: rabbitmq:4.1.4-management
-  #   container_name: cursomsrabbitmq
-  #   hostname: pcivil-rabbitmq
-  #   ports:
-  #     - "15672:15672"  # Management UI
-  #     - "5672:5672"    # AMQP protocol
-  #   environment:
-  #     - RABBITMQ_DEFAULT_USER=guest
-  #     - RABBITMQ_DEFAULT_PASS=guest
-  #   volumes:
-  #     - rabbitmq_data:/var/lib/rabbitmq
-  #   networks:
-  #     - app-network
-  #   healthcheck:
-  #     test: ["CMD", "rabbitmqctl", "status"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-
   # keycloak:
   #   image: quay.io/keycloak/keycloak:26.4.0
   #   container_name: cursomskeycloak
@@ -173,6 +153,55 @@ services:
       EUREKA_URI: http://apibanco-eureka:8761/eureka/
       # - KEYCLOAK_SERVER: apibancokeycloak
       # - KEYCLOAK_PORT: 8080
+  
+  cassandra:
+    image: cassandra:4.1
+    container_name: apibanco-cassandra
+    ports:
+      - "9042:9042"
+    networks:
+      - apibanco-network
+    environment:
+      - CASSANDRA_CLUSTER_NAME=apibanco-cluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - JVM_OPTS=-Xms256M -Xmx512M # Limitando memória para não pesar no PC
+      # CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch"
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh", "-e", "describe cluster"]
+      # test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # Container temporário que cria a tabela no Cassandra assim que ele estiver saudável
+  cassandra-init:
+    image: cassandra:4.1
+    container_name: apibanco-cassandra-init
+    networks:
+      - apibanco-network
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    command: >
+      /bin/bash -c "
+        echo 'Criando keyspace e tabelas no Cassandra...';
+        cqlsh cassandra 9042 -e \"
+          CREATE KEYSPACE IF NOT EXISTS bank_history 
+          WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+          
+          CREATE TABLE IF NOT EXISTS bank_history.transactions_by_account (
+              account_id text,
+              transaction_time timestamp,
+              transaction_id uuid,
+              account_destination text,
+              amount decimal,
+              type text,
+              status text,
+              PRIMARY KEY ((account_id), transaction_time)
+          ) WITH CLUSTERING ORDER BY (transaction_time DESC);
+        \"
+      "
 
 volumes:
   # rabbitmq_data:
