@@ -2,6 +2,7 @@ package br.com.apibanco.msextratoconsumer.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +17,18 @@ public class TransactionConsumer {
     private static final Logger log = LoggerFactory.getLogger(TransactionConsumer.class);
     private final TransactionRepository repository;
 
+    @Value("${app.spring.kafka.topic.transactions}")
+    private String topicName;
+
+    @Value("${app.spring.kafka.consumer.group-id}")
+    private String groupId;
+
     /**
      * O Spring injeta o objeto deserializado automaticamente baseado na nossa
      * config do yml.
      */
-    // @KafkaListener(topics = "bank-transactions", groupId =
-    // "cassandra-extrato-group")
-    @KafkaListener(topics = "${spring.kafka.topic.transactions}", groupId = "${spring.kafka.consumer.group-id}")
+    // @KafkaListener(topics = "${topicName}", groupId = "${groupId}")
+    @KafkaListener(topics = "bank-transactions", groupId = "cassandra-extrato-group")
     public void consume(TransactionEventDTO event) {
         log.info("Processando evento recebido do Kafka: {}", event.transactionId());
 

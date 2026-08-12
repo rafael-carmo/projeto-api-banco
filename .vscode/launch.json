@@ -2,6 +2,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "MsextratoconsumerApplication",
+      "request": "launch",
+      "mainClass": "br.com.apibanco.msextratoconsumer.MsextratoconsumerApplication",
+      "projectName": "msextratoconsumer"
+    },
+    {
+      "type": "java",
       "name": "Spring Boot-EurekaserverApplication<eurekaserver>",
       "request": "launch",
       "cwd": "${workspaceFolder}",

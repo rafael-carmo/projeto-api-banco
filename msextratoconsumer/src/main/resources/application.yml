@@ -21,7 +21,7 @@ spring:
       properties:
         # IMPORTANTE: Como desligamos os headers de tipo no produtor, 
         # configuramos o JsonDeserializer para converter o JSON bruto recebido direto no DTO deste projeto.
-        spring.json.value.default.type: "br.com.apibanco.msextrato.dtos.TransactionEventDTO"
+        spring.json.value.default.type: "br.com.apibanco.msextratoconsumer.dtos.TransactionEventDTO"
         spring.json.trusted.packages: "*"
 
   # CONFIGURAÇÃO DO CASSANDRA [1]
@@ -44,3 +44,10 @@ eureka:
   instance:
     instance-id: ${spring.application.name}:${random.value}
 
+# app:
+#   spring:
+#     kafka:
+#       topic:
+#         transactions: bank-transactions
+#       consumer:
+#         group-id: cassandra-extrato-group

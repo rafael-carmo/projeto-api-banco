@@ -153,6 +153,28 @@ services:
       EUREKA_URI: http://apibanco-eureka:8761/eureka/
       # - KEYCLOAK_SERVER: apibancokeycloak
       # - KEYCLOAK_PORT: 8080
+
+  msextratoconsumer:
+    build: 
+      context: ./msextratoconsumer
+      dockerfile: Dockerfile
+    image: apibanco-msextratoconsumer:1.0.0
+    container_name: apibanco-msextratoconsumer
+    networks:
+      - apibanco-network
+    depends_on:
+      eureka:
+        condition: service_started
+      kafka:
+        condition: service_started
+      cassandra:
+        condition: service_healthy # Só liga o consumidor quando o Cassandra estiver 100% pronto
+    # ADICIONADO: Aguarda 15 segundos para garantir o Eureka respondendo rotas e o Kafka pronto
+    entrypoint: ["sh", "-c", "sleep 15 && java -jar app.jar"]
+    environment:
+      EUREKA_URI: http://apibanco-eureka:8761/eureka/
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CASSANDRA_HOST: cassandra
   
   cassandra:
     image: cassandra:4.1
@@ -164,14 +186,19 @@ services:
     environment:
       - CASSANDRA_CLUSTER_NAME=apibanco-cluster
       - CASSANDRA_DC=datacenter1
-      - CASSANDRA_RACK=rack1
-      - JVM_OPTS=-Xms256M -Xmx512M # Limitando memória para não pesar no PC
+      # CORREÇÃO AQUI: Removemos o JVM_OPTS e usamos as variáveis nativas do Cassandra.
+      # Definimos 1GB de Heap e 256MB de New Size (perfeito para rodar leve e sem quebrar os cálculos da JVM).
+      - CASSANDRA_HEAPSIZE=1G
+      - CASSANDRA_NEWSIZE=256M
+      # - JVM_OPTS=-Xms512M -Xmx1024M # Limitando memória para não pesar no PC
+      # - CASSANDRA_RACK=rack1
       # CASSANDRA_ENDPOINT_SNITCH: "GossipingPropertyFileSnitch"
     healthcheck:
-      test: ["CMD-SHELL", "cqlsh", "-e", "describe cluster"]
+      # Alterado para usar o comando 'nodetool status' que é mais confiável e leve para checar a saúde
+      test: ["CMD-SHELL", "nodetool status | grep -E '^UN' || exit 1"]
       # test: ["CMD", "cqlsh", "-e", "describe keyspaces"]
-      interval: 10s
-      timeout: 5s
+      interval: 15s
+      timeout: 10s
       retries: 5
   
   # Container temporário que cria a tabela no Cassandra assim que ele estiver saudável
