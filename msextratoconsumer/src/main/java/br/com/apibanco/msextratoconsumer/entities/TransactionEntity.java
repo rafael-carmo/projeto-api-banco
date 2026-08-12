@@ -20,7 +20,7 @@ import java.util.UUID;
 public class TransactionEntity {
 
     // Chave de Partição: Define em qual nó do cluster o dado vai morar
-    @PrimaryKeyColumn(name = "acount_id", type = PrimaryKeyType.PARTITIONED)
+    @PrimaryKeyColumn(name = "account_id", type = PrimaryKeyType.PARTITIONED)
     private String accountId;
 
     // Chave de Ordenação (Clustering Key): Garante a ordenação decrescente física

@@ -14,14 +14,22 @@ spring:
       # ele começará a ler o tópico desde a primeira mensagem disponível.
       auto-offset-reset: earliest
       
-      # Deserializadores: Como transformar os bytes da rede de volta para objetos Java
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      # CORREÇÃO: Envolvemos o JsonDeserializer dentro de um ErrorHandlingDeserializer.
+      # Isso atende ao aviso do log e evita que mensagens corrompidas travem sua aplicação.
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       
       properties:
-        # IMPORTANTE: Como desligamos os headers de tipo no produtor, 
-        # configuramos o JsonDeserializer para converter o JSON bruto recebido direto no DTO deste projeto.
+        # Aponta qual é o deserializador real de fallback que vai tratar o JSON
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        
+        # O PULO DO GATO: Força o consumidor a usar o DTO local deste projeto, 
+        # ignorando completamente o pacote enviado pelo produtor.
         spring.json.value.default.type: "br.com.apibanco.msextratoconsumer.dtos.TransactionEventDTO"
+        
+        # CORREÇÃO CRUCIAL: Diz ao Spring para ignorar os cabeçalhos de tipo que vierem na mensagem
+        spring.json.use.type.headers: false
         spring.json.trusted.packages: "*"
 
   # CONFIGURAÇÃO DO CASSANDRA [1]
