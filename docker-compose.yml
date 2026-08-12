@@ -210,8 +210,11 @@ services:
     depends_on:
       cassandra:
         condition: service_healthy
+    # ADICIONADO: Um sleep de 15 segundos para garantir que o protocolo CQL do Cassandra subiu
     command: >
       /bin/bash -c "
+        echo 'Aguardando estabilização final do Cassandra...';
+        sleep 15;
         echo 'Criando keyspace e tabelas no Cassandra...';
         cqlsh cassandra 9042 -e \"
           CREATE KEYSPACE IF NOT EXISTS bank_history 
@@ -229,6 +232,7 @@ services:
           ) WITH CLUSTERING ORDER BY (transaction_time DESC);
         \"
       "
+
 
 volumes:
   # rabbitmq_data:

@@ -17,18 +17,13 @@ public class TransactionConsumer {
     private static final Logger log = LoggerFactory.getLogger(TransactionConsumer.class);
     private final TransactionRepository repository;
 
-    @Value("${app.spring.kafka.topic.transactions}")
-    private String topicName;
-
-    @Value("${app.spring.kafka.consumer.group-id}")
-    private String groupId;
-
     /**
      * O Spring injeta o objeto deserializado automaticamente baseado na nossa
      * config do yml.
      */
-    // @KafkaListener(topics = "${topicName}", groupId = "${groupId}")
-    @KafkaListener(topics = "bank-transactions", groupId = "cassandra-extrato-group")
+    @KafkaListener(topics = "${app.spring.kafka.topic.transactions}", groupId = "${app.spring.kafka.consumer.group-id}")
+    // @KafkaListener(topics = "bank-transactions", groupId =
+    // "cassandra-extrato-group")
     public void consume(TransactionEventDTO event) {
         log.info("Processando evento recebido do Kafka: {}", event.transactionId());
 
