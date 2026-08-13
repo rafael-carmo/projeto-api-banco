@@ -30,9 +30,11 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-
+      
 server:
   port: 8080
+  # IMPORTANTE: Adicione isso na raiz do yml se o Swagger falhar ao carregar os caminhos internos
+  forward-headers-strategy: framework
 
 eureka:
   client:
@@ -42,3 +44,17 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+springdoc:
+  swagger-ui:
+    # Ativa a interface visual apenas no Gateway
+    enabled: true
+    # Cria os grupos automaticamente mapeando os microsserviços registrados no Eureka
+    urls:
+      - name: API Transações (Postgres/Kafka)
+        url: /mstransacoes/v3/api-docs
+      - name: API Extratos (Cassandra/Consumer)
+        url: /msextratoconsumer/v3/api-docs
+
+
+

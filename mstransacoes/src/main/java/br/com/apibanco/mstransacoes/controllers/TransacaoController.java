@@ -14,16 +14,24 @@ import br.com.apibanco.mstransacoes.dtos.ComprovanteSaqueDTO;
 import br.com.apibanco.mstransacoes.dtos.TransferenciaDTO;
 import br.com.apibanco.mstransacoes.dtos.ComprovanteTransferenciaDTO;
 import br.com.apibanco.mstransacoes.services.TransacaoService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/transacoes")
 @RequiredArgsConstructor
+@Tag(name = "Transações", description = "Operações relacionadas a transações bancárias")
 public class TransacaoController {
 
     private final TransacaoService transacaoService;
 
+    @Operation(summary = "Verifica o status do serviço de transações", description = "Retorna o status do serviço de transações bancárias, indicando se está operacional.")
+    @ApiResponse(responseCode = "200", description = "Serviço operacional")
+    @ApiResponse(responseCode = "503", description = "Serviço indisponível")
+    @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     @GetMapping
     public ResponseEntity<String> status() {
         return ResponseEntity.ok("Status do serviço de transações: OK");
