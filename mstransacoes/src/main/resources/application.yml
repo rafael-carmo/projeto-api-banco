@@ -44,8 +44,8 @@ spring:
 
 server:
   port: 0
-  servlet:
-    context-path: /mstransacoes
+  # servlet:
+  #   context-path: /mstransacoes
 
 eureka:
   client:
@@ -70,6 +70,9 @@ springdoc:
     # Caminho onde o Spring vai gerar o JSON bruto da documentação
     path: /v3/api-docs
     enabled: true
+    # CONFIGURAÇÃO CRUCIAL: Avisa ao Springdoc para embutir o prefixo correto nas rotas do JSON do Swagger
+  config-properties:
+    springdoc.swagger-ui.configUrl: /mstransacoes/v3/api-docs
   packages-to-scan:
   - br.com.apibanco.mstransacoes.controllers
   writer-with-default-pretty-printer: true

@@ -42,6 +42,9 @@ spring:
 
 server:
   port: 0 # Porta aleatória para não conflitar com outros microserviços
+  # servlet:
+  #   # CORREÇÃO: Alinha o endpoint físico com o roteamento do Gateway
+  #   context-path: /msextratoconsumer 
 
 eureka:
   client:
@@ -51,6 +54,14 @@ eureka:
       defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
   instance:
     instance-id: ${spring.application.name}:${random.value}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  config-properties:
+    springdoc.swagger-ui.configUrl: /msextratoconsumer/v3/api-docs
+  writer-with-default-pretty-printer: true
 
 app:
   spring:

@@ -14,7 +14,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/v1/extratos")
+@RequestMapping("/api/v1")
 public class ExtratoController {
 
     private final ExtratoService service;

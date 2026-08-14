@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/transacoes")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Tag(name = "Transações", description = "Operações relacionadas a transações bancárias")
 public class TransacaoController {
